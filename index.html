@@ -45,10 +45,33 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
   <script>
     $(document).ready(function () {
-      $("#currentDay").text((new Date()).toDateString());
       var hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"];
+      var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      var now = new Date();
+      var year = now.getFullYear();
+      var month = now.getMonth();
+      var date = now.getDate(); //(1-31)
+      var hour = now.getHours();
+      var day = now.getDay(); //(0-6)
+      var description = "";
+      if (day !== 0 && day !== 6) {
+        $("#currentDay").text((now).toDateString());
+      } else {
+        now.setDate(now.getDate() + 1);
+        date = now.getDate();
+        var oldDate = new Date().getDate();
+        $("#currentDay").text((now).toDateString());
+      }
+      var dayPlansObj = {
+        year: "",
+        month: "",
+        day: "",
+        hour: "",
+        desc: ""
+      };
       let dayPlansArray = localStorage.getItem('dayPlans') ? JSON.parse(localStorage.getItem('dayPlans')) : [];
-      var nowHour = new Date().getHours();
+
+
       init();
 
       function init() {
@@ -58,12 +81,26 @@
 
         // If todos were retrieved from localStorage, update the todos array to it
         if (storedDayPlans !== null) {
-          dayPlans = storedDayPlans;
+          dayPlansArray = storedDayPlans;
         }
 
         // Render todos to the DOM
+        startInterval();
         renderDayList();
-        timeBlocksColorChange(nowHour);
+        timeBlocksColorChange(hour);
+      }
+
+      $(document).on("click", ".saveBtn", saveDayPlans);
+
+      function saveDayPlans(){
+        var dayPlanIndex = $(this).attr("dataIndex");
+        console.log(dayPlanIndex);
+        $(".description").each(function () {
+          if($(this).attr("dataIndex") === dayPlanIndex){
+            description = $(this).val();
+            console.log(description);
+          }
+        });
       }
 
       function renderDayList() {
@@ -95,24 +132,33 @@
         });
       }
 
-      function saveToLocaleStorage() {
+      function modifyDayPlansObj(description) {
         var dayPlansObj = {
-          date: new Date(),
+          year: year,
+          month: month,
+          day: day,
+          hour: hour,
           desc: description
         };
+      }
+
+      function saveToLocaleStorage() {
         dayPlansArray.push(dayPlansObj);
         localStorage.setItem('dayPlans', JSON.stringify(dayPlansArray));
         renderDayList();
       }
 
-      function timeBlocksColorChange(nowHour) {
+      function timeBlocksColorChange(hour) {
         $(".description").each(function () {
-          console.log($(this).attr("dataIndex"));
-          if ($(this).attr("dataIndex") < nowHour) {
-            $(this).toggleClass("past");
-          } else if ($(this).attr("dataIndex") == nowHour) {
-            $(this).toggleClass("present");
-          } else if ($(this).attr("dataIndex") > nowHour) {
+          if (date === oldDate) {
+            if ($(this).attr("dataIndex") < hour) {
+              $(this).toggleClass("past");
+            } else if ($(this).attr("dataIndex") == hour) {
+              $(this).toggleClass("present");
+            } else if ($(this).attr("dataIndex") > hour) {
+              $(this).toggleClass("future");
+            }
+          } else {
             $(this).toggleClass("future");
           }
         });
@@ -123,9 +169,9 @@
       }
 
       function count() {
-        var nowHour2 = new Date().getHours();
-        if (nowHour2 > nowHour) {
-          timeBlocksColorChange(nowHour2);
+        var newHour = new Date().getHours();
+        if (newHour > hour) {
+          timeBlocksColorChange(newHour);
         }
       }
     });
