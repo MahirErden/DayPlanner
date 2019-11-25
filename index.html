@@ -16,7 +16,7 @@
 
 <body>
   <header class="jumbotron">
-    <h1 class="display-3">Work Day Scheduler</h1>
+    <h1 class="display-4">Work Day Scheduler</h1>
     <p class="lead">A simple calendar app for scheduling your work day</p>
     <p id="currentDay" class="lead"></p>
   </header>
@@ -25,16 +25,6 @@
       <div class="col md-12">
         <!-- <div class="time-block "> -->
         <ul id="dayPlanList">
-          <!-- <li class="time-block">
-                  <p class="hour">9AM</p>
-                  <textarea class="description" rows="2" cols="50"></textarea>            
-                  <button class="saveBtn fa fa-save"></button>
-              </li>
-              <li class="time-block">
-                  <p class="hour">10AM</p>
-                  <textarea class="description" rows="2" cols="50"></textarea>            
-                  <button class="saveBtn fa fa-save"></button>
-              </li> -->
         </ul>
       </div>
     </div>
@@ -91,6 +81,7 @@
         startInterval();
         renderDayList();
         timeBlocksColorChange(hour);
+        renderLocaleStorage();
       }
 
       $(document).on("click", ".saveBtn", saveDayPlans);
@@ -128,8 +119,6 @@
 
           p.text(hours[i]);
 
-          //div.append(p, input, button);
-          //li.append(div);
           li.append(p);
           li.append(input);
           li.append(button);
@@ -148,10 +137,21 @@
         };
       }
 
+      function renderLocaleStorage() {
+        if (dayPlansArray.length > 0) {
+          $.each(dayPlansArray, function (i, plan) {
+            $(".description").each(function () {
+              if ($(this).attr("dataIndex") == plan.hour) {
+                $(this).val(plan.desc);
+              }
+            });
+          });
+        }
+      }
+
       function saveToLocaleStorage() {
-        //dayPlansArray = localStorage.getItem('dayPlans') ? JSON.parse(localStorage.getItem('dayPlans')) : [];
         var inArray = false;
-        if (dayPlansArray.length > 0){
+        if (dayPlansArray.length > 0) {
           $.each(dayPlansArray, function (i, plan) {
             if (plan.desc === dayPlansObj.desc &&
               plan.hour === dayPlansObj.hour &&
@@ -173,14 +173,18 @@
         $(".description").each(function () {
           if (date === oldDate) {
             if ($(this).attr("dataIndex") < hour) {
-              $(this).toggleClass("past");
+              $(this).removeClass();
+              $(this).addClass("description past");
             } else if ($(this).attr("dataIndex") == hour) {
-              $(this).toggleClass("present");
+              $(this).removeClass();
+              $(this).addClass("description present");
             } else if ($(this).attr("dataIndex") > hour) {
-              $(this).toggleClass("future");
+              $(this).removeClass();
+              $(this).addClass("description future");
             }
           } else {
-            $(this).toggleClass("future");
+            $(this).removeClass();
+            $(this).addClass("description future");
           }
         });
       }
