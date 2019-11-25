@@ -46,11 +46,14 @@
   <script>
     $(document).ready(function () {
       var hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"];
-      var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       var now = new Date();
       var year = now.getFullYear();
-      var month = now.getMonth();
+      var month = now.getMonth() + 1;
+      if (month === 12) {
+        month = 1;
+      }
       var date = now.getDate(); //(1-31)
+      var oldDate = now.getDate();
       var hour = now.getHours();
       var day = now.getDay(); //(0-6)
       var description = "";
@@ -59,13 +62,13 @@
       } else {
         now.setDate(now.getDate() + 1);
         date = now.getDate();
-        var oldDate = new Date().getDate();
+        oldDate = new Date().getDate();
         $("#currentDay").text((now).toDateString());
       }
       var dayPlansObj = {
         year: "",
         month: "",
-        day: "",
+        date: "",
         hour: "",
         desc: ""
       };
@@ -92,15 +95,18 @@
 
       $(document).on("click", ".saveBtn", saveDayPlans);
 
-      function saveDayPlans(){
+      function saveDayPlans() {
         var dayPlanIndex = $(this).attr("dataIndex");
-        console.log(dayPlanIndex);
         $(".description").each(function () {
-          if($(this).attr("dataIndex") === dayPlanIndex){
+          if ($(this).attr("dataIndex") === dayPlanIndex) {
             description = $(this).val();
-            console.log(description);
+            hour = $(this).attr("dataIndex");
           }
         });
+        if (description !== null) {
+          modifyDayPlansObj();
+          saveToLocaleStorage();
+        }
       }
 
       function renderDayList() {
@@ -132,20 +138,35 @@
         });
       }
 
-      function modifyDayPlansObj(description) {
-        var dayPlansObj = {
+      function modifyDayPlansObj() {
+        dayPlansObj = {
           year: year,
           month: month,
-          day: day,
+          date: date,
           hour: hour,
           desc: description
         };
       }
 
       function saveToLocaleStorage() {
-        dayPlansArray.push(dayPlansObj);
-        localStorage.setItem('dayPlans', JSON.stringify(dayPlansArray));
-        renderDayList();
+        //dayPlansArray = localStorage.getItem('dayPlans') ? JSON.parse(localStorage.getItem('dayPlans')) : [];
+        var inArray = false;
+        if (dayPlansArray.length > 0){
+          $.each(dayPlansArray, function (i, plan) {
+            if (plan.desc === dayPlansObj.desc &&
+              plan.hour === dayPlansObj.hour &&
+              plan.date === dayPlansObj.date) {
+              inArray = True;
+              console.log(plan.desc);
+            }
+          });
+        }
+        console.log(inArray);
+        if (!inArray) {
+          localStorage.clear();
+          dayPlansArray.push(dayPlansObj);
+          localStorage.setItem('dayPlans', JSON.stringify(dayPlansArray));
+        }
       }
 
       function timeBlocksColorChange(hour) {

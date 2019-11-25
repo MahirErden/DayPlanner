@@ -97,7 +97,8 @@ li {
   height: 60px;
 }
 
-.saveBtn i:hover {
+.saveBtn:hover {
   font-size: 20px;
   transition: all .3s ease-in-out;
+  background-color: rgb(213, 54, 6);
 }
